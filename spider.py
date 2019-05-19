@@ -7,8 +7,9 @@ from labelFilter import html_filter
 from outToTxt import outTxt
 from outToDb import Connetction
 from analyzeHtml import searchContentById
+
 def searchQuestionByTopic(topicId, sum=100, pageSize=10, pageNum=1):
-    question_db_id=44
+    questionSet=set()
     #  ua_headers = {'User-Agent':'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.101 Safari/537.36'}
     #  虚拟header头部
     headers = [{
@@ -22,7 +23,6 @@ def searchQuestionByTopic(topicId, sum=100, pageSize=10, pageNum=1):
         {
         }]
     header={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36'}
-
     #  example topicI=19550447
     # #  分页查询页码
     # pageNum=0
@@ -43,21 +43,23 @@ def searchQuestionByTopic(topicId, sum=100, pageSize=10, pageNum=1):
         data = req_json['data']
         for item in data:
             if ("question" in item["target"]):  # 结果里可能包含文章，不是question,排除
-                cnt = cnt + 1
                 qid = item["target"]["question"]["id"]
-                # 热门提问
-                question_title = item["target"]["question"]["title"]
-                question_content=searchContentById(qid)
-                # print(question_title+question_content)
-                c=Connetction()
-                new_qid=c.insertQuestion(question_title=question_title,question_content=question_content)
-                # question_db_id=question_db_id+1
-                # top_answer=item["target"]["content"]
-                # 搜索问题下面的回答
-                searchAnswersByQid(qid,question_db_id=new_qid,sum=100)
-                if (cnt >= sum):
-                    return
-def searchAnswersByQid(qid,question_db_id,limit=10, pageNum=0,sum=1000):
+                if(not qid in questionSet):
+                    questionSet.add(qid)
+                    # 热门提问
+                    cnt = cnt + 1
+                    print(cnt)
+                    question_title = item["target"]["question"]["title"]
+                    question_content=searchContentById(qid)
+                    # print(question_title+question_content)
+                    c=Connetction()
+                    new_qid=c.insertQuestion(question_title=question_title,question_content=question_content,user_id=random.randint(1,20))
+                    # top_answer=item["target"]["content"]
+                    # 搜索问题下面的回答
+                    searchAnswersByQid(qid,question_db_id=new_qid,sum=50)
+                    if (cnt >= sum):
+                        return
+def searchAnswersByQid(qid,question_db_id,limit=10, pageNum=0,sum=50):
     print(qid)
     cnt = 0
     while(True):
@@ -101,7 +103,7 @@ def searchAnswersByQid(qid,question_db_id,limit=10, pageNum=0,sum=1000):
             break
 if __name__ == '__main__':
     start=time.time()
-    searchQuestionByTopic(19550429,sum=100)
+    searchQuestionByTopic(19550517,sum=100)
     #searchAnswersByQid(41047159,sum=10)
     end=time.time()
     print("本次任务花费了"+str(end-start)+"s")

@@ -27,26 +27,29 @@ class Connetction:
     #         self.db.close()
 
     #插入数据返回id
-    def insertQuestion(self,question_title,question_content="",userId=1):
+    def insertQuestion(self,question_title,question_content="",user_id=1):
         cursor = self.db.cursor()
         insert_sql = "insert into question(title, content,user_id, created_date, comment_count, status) values(%s, %s, %s, %s, %s, %s)"
         # 参数列表
         title=question_title
         content=question_content
-        use_id=random.randint(1,7)
+        # user_id=user_id
         created_date= time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
         comment_count='0'
         status='0'
-        values = (title, content, use_id,created_date, comment_count, status)
+        values = (title, content, user_id,created_date, comment_count, status)
         try:
         # 执行SQL语句
+            self.db.ping(reconnect=True)
             cursor.execute(insert_sql,values)
             # 获取所有记录列表
             self.db.commit()
             row_id=cursor.lastrowid
             return row_id
         except:
-            print("Error: unable to fetch data")
+            print(insert_sql)
+            print(values)
+            print("Error: unable to fetch data question")
             # 关闭数据库连接
             self.db.close()
 
@@ -63,12 +66,15 @@ class Connetction:
         values = (user_id, content, created_date, entityId,entityType, status)
         try:
             # 执行SQL语句
+            self.db.ping(reconnect=True)
             cursor.execute(insert_sql, values)
             # 获取所有记录列表
             self.db.commit()
             row_id = cursor.lastrowid
             return row_id
         except:
+            print(insert_sql)
+            print(values)
             print("Error: unable to fetch data")
             # 关闭数据库连接
             self.db.close()
